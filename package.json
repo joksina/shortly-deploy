@@ -31,6 +31,9 @@
     "bluebird": "1.0.8"
   },
   "devDependencies": {
+    "grunt-contrib-imagemin": "^1.0.0",
+    "grunt-contrib-requirejs": "^0.4.4",
+    "grunt-contrib-uglify": "^0.4.1",
     "supertest": "^0.10.0"
   }
 }

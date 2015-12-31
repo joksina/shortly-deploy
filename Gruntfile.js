@@ -2,8 +2,15 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    concat: {
-    },
+    concat: {   
+    dist: {
+        src: [
+          'public/client/*.js',
+          'public/lib/*.js',// This specific file
+        ],
+        dest: 'public/dist/production.js',
+    }
+},
 
     mochaTest: {
       test: {
@@ -20,27 +27,51 @@ module.exports = function(grunt) {
       }
     },
 
-    uglify: {
-    },
-
+  sass: {
+      dist: {
+          options: {
+              style: 'compressed'
+          },
+          files: {
+              'css/build/global.css': 'css/global.scss'
+          }
+      } 
+  },
     jshint: {
       files: [
         // Add filespec list here
+        'app/**/*.js',
+        'public/client/*.js',
+        // 'public/dist/production.js'
       ],
       options: {
         force: 'true',
         jshintrc: '.jshintrc',
         ignores: [
           'public/lib/**/*.js',
-          'public/dist/**/*.js'
+          // 'public/dist/**/*.js'
         ]
       }
     },
+
+    imagemin: {
+    dynamic: {
+        files: [{
+            expand: true,
+            cwd: 'images/',
+            src: ['**/*.{png,jpg,gif}'],
+            dest: 'images/build/'
+        }]
+    }
+},
 
     cssmin: {
     },
 
     watch: {
+      options: {
+        livereload: true,
+    },
       scripts: {
         files: [
           'public/client/**/*.js',
@@ -53,9 +84,19 @@ module.exports = function(grunt) {
       },
       css: {
         files: 'public/*.css',
-        tasks: ['cssmin']
+        tasks: ['cssmin'],
+        options: {
+        spawn: false,
+        }
       }
     },
+
+    uglify: {
+      build: {
+        src: 'public/dist/production.js',
+        dest: 'public/dist/production.min.js'
+    }
+},
 
     shell: {
       prodServer: {
@@ -63,6 +104,7 @@ module.exports = function(grunt) {
     },
   });
 
+  grunt.loadNpmTasks('grunt-contrib-imagemin');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
@@ -71,6 +113,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-nodemon');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
 
   grunt.registerTask('server-dev', function (target) {
     // Running nodejs in a different process and displaying output on the main console
@@ -89,12 +132,15 @@ module.exports = function(grunt) {
   // Main grunt tasks
   ////////////////////////////////////////////////////
 
+
   grunt.registerTask('test', [
     'mochaTest'
   ]);
+ grunt.loadNpmTasks('grunt-contrib-concat');
 
-  grunt.registerTask('build', [
-  ]);
+  grunt.registerTask('build', ['concat', 'uglify']);
+
+grunt.registerTask('default', ['concat', 'uglify', 'imagemin']);
 
   grunt.registerTask('upload', function(n) {
     if(grunt.option('prod')) {
@@ -106,6 +152,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('deploy', [
     // add your deploy tasks here
+    'build', 'upload'
   ]);
 
 
